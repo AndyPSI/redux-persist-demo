@@ -1,26 +1,57 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware, compose } from "redux";
+import { PersistGate } from "redux-persist/lib/integration/react";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import Thunk from "redux-thunk";
+import _ from "lodash";
+import Main from "./components/Main";
+import reduxState from "./constants/config";
+import { combineReducers } from "redux";
+import { countContainer, testContainer } from "./reducers";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const countContainerConfig = {
+  key: "root",
+  storage: storage,
+  blackList: ["testContainer"],
+  migrate: state => {
+    return Promise.resolve(_.merge(reduxState, state));
+  }
+};
+
+const testContainerConfig = {
+  key: "root",
+  storage: storage,
+  blackList: ["countContainer"],
+  migrate: state => {
+    return Promise.resolve(_.merge(reduxState, state));
+  }
+};
+
+const rootReducer = combineReducers({
+  countContainer: persistReducer(countContainerConfig, countContainer),
+  testContainer: testContainer
+});
+const rootReducer = persistReducer(persistConfig, reducers);
+
+const store = createStore(rootReducer, {}, applyMiddleware(Thunk));
+const persistor = persistStore(store);
+
+class App extends Component {
+  resetState() {
+    persistor.purge();
+  }
+
+  render() {
+    return (
+      <Provider store={store}>
+        <PersistGate persistor={persistor}>
+          <Main resetState={() => this.resetState()}></Main>
+        </PersistGate>
+      </Provider>
+    );
+  }
 }
 
 export default App;
