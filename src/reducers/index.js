@@ -7,4 +7,4 @@ const reducers = {
   testContainer
 };
 
-export default reducers;
+export { countContainer, testContainer };

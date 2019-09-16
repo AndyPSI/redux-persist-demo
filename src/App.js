@@ -14,12 +14,15 @@ import { countContainer, testContainer } from "./reducers";
 const countContainerConfig = {
   key: "root",
   storage: storage,
-  blackList: ["testContainer"],
+  // blackList: ["testContainer"],
   migrate: state => {
     return Promise.resolve(_.merge(reduxState, state));
   }
 };
 
+// Can create a different store for these values,
+// Or can continue to not be persisted
+// Can wrap a PersistGate with a different store to utilize it in render
 const testContainerConfig = {
   key: "root",
   storage: storage,
@@ -33,7 +36,6 @@ const rootReducer = combineReducers({
   countContainer: persistReducer(countContainerConfig, countContainer),
   testContainer: testContainer
 });
-const rootReducer = persistReducer(persistConfig, reducers);
 
 const store = createStore(rootReducer, {}, applyMiddleware(Thunk));
 const persistor = persistStore(store);
